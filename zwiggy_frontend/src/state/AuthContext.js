@@ -43,16 +43,24 @@ export function AuthProvider({ api, children }) {
       // PUBLIC_INTERFACE
       async login({ email, password, role }) {
         const res = await api.login({ email, password, role });
-        setToken(res.token);
-        setUser(res.user);
-        return res.user;
+        // Backend returns: { access_token, token_type }
+        const token = res.access_token || res.token;
+        setToken(token);
+        // Fetch user profile from backend to populate role/id/email
+        const me = await api.me();
+        setUser(me);
+        return me;
       },
       // PUBLIC_INTERFACE
       async register({ name, email, password, role }) {
-        const res = await api.register({ name, email, password, role });
-        setToken(res.token);
-        setUser(res.user);
-        return res.user;
+        await api.register({ name, email, password, role });
+        // Auto-login after signup to obtain a token + profile.
+        const res = await api.login({ email, password, role });
+        const token = res.access_token || res.token;
+        setToken(token);
+        const me = await api.me();
+        setUser(me);
+        return me;
       },
       // PUBLIC_INTERFACE
       logout() {

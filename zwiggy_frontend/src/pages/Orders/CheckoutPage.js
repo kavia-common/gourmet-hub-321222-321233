@@ -34,13 +34,8 @@ export default function CheckoutPage({ api }) {
     setBusy(true);
     setErr(null);
     try {
-      const payload = {
-        restaurantId: cart.restaurant.id,
-        items: cart.items,
-        address,
-        note,
-        paymentMethod
-      };
+      // Backend OpenAPI: POST /orders expects { delivery_address }
+      const payload = { delivery_address: address };
       const order = await api.placeOrder(payload);
       cart.clearCart();
       nav(`/orders/${order.id}`, { replace: true });
